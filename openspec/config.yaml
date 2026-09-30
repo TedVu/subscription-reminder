@@ -1,0 +1,47 @@
+schema: spec-driven
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+# Add your tech stack, conventions, style guides, domain knowledge, etc.
+# Example:
+#   context: |
+#     Tech stack: TypeScript, React, Node.js
+#     We use conventional commits
+#     Domain: e-commerce platform
+context: |
+  Domain: local-first mobile app for tracking recurring subscriptions and
+  reminding the user before they renew. No backend in the MVP; Supabase sync
+  may come later.
+  Tech stack: Expo SDK 57 (React Native 0.86, React 19, TypeScript strict),
+  Expo Router (routes in src/app/, non-route code elsewhere in src/),
+  expo-sqlite + Drizzle ORM (schema src/db/schema.ts, migrations drizzle/),
+  expo-notifications for scheduled local reminders, Zustand for state,
+  date-fns for date math. Tests: Jest (jest-expo) + React Native Testing Library.
+  Builds via EAS; the developer is on Windows (no local iOS builds).
+  Conventions: add packages with `npx expo install`; never hand-edit ios/ or
+  android/ (Continuous Native Generation); store money as integer minor units
+  plus an ISO 4217 currency code; iOS caps pending local notifications at 64,
+  so schedule only the nearest reminders and reschedule on app open.
+  Before done: npm run lint, npm run typecheck, npm test.
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing

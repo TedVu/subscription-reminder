@@ -1,25 +1,27 @@
 import { router } from 'expo-router';
-import { View } from 'react-native';
 
-import { Loading, LoadError, OfflineBanner } from '@/components/query-state';
-import { SubscriptionList } from '@/components/subscription-list';
+import { MaterialHost } from '@/components/material/material-host';
+import { ErrorView, LoadingView } from '@/components/material/pieces';
+import { SubscriptionsScreen } from '@/components/material/subscriptions-screen';
 import { useSubscriptions } from '@/lib/queries/subscriptions';
+import { subscriptionsScreen } from '@/lib/screens/subscriptions';
 import { localToday } from '@/lib/subscriptions/form-values';
 
 export default function SubscriptionsRoute() {
   const { data, isError, refetch } = useSubscriptions();
-  if (data) {
-    return (
-      <View style={{ flex: 1 }}>
-        <OfflineBanner />
-        <SubscriptionList
-          subs={data}
-          today={localToday()}
+  return (
+    <MaterialHost>
+      {data ? (
+        <SubscriptionsScreen
+          model={subscriptionsScreen(data, localToday())}
           onAdd={() => router.push('/subscriptions/new')}
           onOpen={(id) => router.push({ pathname: '/subscriptions/[id]', params: { id } })}
         />
-      </View>
-    );
-  }
-  return isError ? <LoadError onRetry={refetch} /> : <Loading />;
+      ) : isError ? (
+        <ErrorView message="Couldn’t load your subscriptions." onRetry={refetch} />
+      ) : (
+        <LoadingView />
+      )}
+    </MaterialHost>
+  );
 }

@@ -36,4 +36,4 @@ Every task is verified by commands that run without a device. "Checks pass" mean
 
 ## 6. Final verification
 
-- [ ] 6.1 Run `npm run typecheck`, `npm run lint`, `npm test`, `npx expo-doctor`, `npx expo export --platform android` and `openspec validate redesign-material3-android --strict`. Verify all succeed with no errors; this task is complete only when every command passes
+- [x] 6.1 Run `npm run typecheck`, `npm run lint`, `npm test`, `npx expo-doctor`, `npx expo export --platform android` and `openspec validate redesign-material3-android --strict`. Verify all succeed with no errors; this task is complete only when every command passes

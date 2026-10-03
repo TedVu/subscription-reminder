@@ -2,7 +2,7 @@
 //
 // Australian polymer banknotes: pale polymer grey, deep navy ink, and each
 // subscription coloured by the note that covers its monthly cost. Note colours
-// are information, never decoration. One family, Familjen Grotesk. Sentence
+// are information, never decoration. System Roboto type. Sentence
 // case everywhere; no shadows or gradients.
 
 import type { ReactNode } from 'react';
@@ -65,11 +65,11 @@ export function useColors(): Colors {
 
 export { palette };
 
-/** Loaded in the root layout; text falls back to the system font until then. */
+/** Android system Roboto families (transitional until screens move to Compose). */
 export const fonts = {
-  regular: 'FamiljenGrotesk_400Regular',
-  semibold: 'FamiljenGrotesk_600SemiBold',
-  bold: 'FamiljenGrotesk_700Bold',
+  regular: 'sans-serif',
+  semibold: 'sans-serif-medium',
+  bold: 'sans-serif-medium',
 };
 
 /** Type scale: 13 / 15 / 17 / 22 / 34. */

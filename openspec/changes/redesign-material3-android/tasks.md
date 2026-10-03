@@ -10,8 +10,8 @@ Every task is verified by commands that run without a device. "Checks pass" mean
 
 ## 2. Navigation shell
 
-- [ ] 2.1 Replace the `(app)` tabs with `expo-router/unstable-native-tabs` `NativeTabs` (Home `calendar_month`, Subscriptions `subscriptions`, Settings `settings`); style the Subscriptions stack header and the root background/status bar from `useAppPalette()`. Verify checks pass and `npx expo export --platform android` bundles
-- [ ] 2.2 Remove Familjen Grotesk (package and font loading in `src/app/_layout.tsx`); keep the splash held until the appearance preference is loaded. Verify `@expo-google-fonts/familjen-grotesk` is absent from `package.json`, no source file references it, and checks pass
+- [x] 2.1 Replace the `(app)` tabs with `expo-router/unstable-native-tabs` `NativeTabs` (Home `calendar_month`, Subscriptions `subscriptions`, Settings `settings`); style the Subscriptions stack header and the root background/status bar from `useAppPalette()`. Verify checks pass and `npx expo export --platform android` bundles
+- [x] 2.2 Remove Familjen Grotesk (package and font loading in `src/app/_layout.tsx`); keep the splash held until the appearance preference is loaded. Verify `@expo-google-fonts/familjen-grotesk` is absent from `package.json`, no source file references it, and checks pass
 
 ## 3. View-models (pure, test-first)
 

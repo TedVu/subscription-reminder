@@ -32,8 +32,8 @@ export function OfflineBanner() {
   return (
     <View
       accessibilityRole="alert"
-      style={[styles.banner, { backgroundColor: colors.accentSoft }]}>
-      <Feather name="wifi-off" size={16} color={colors.onAccent} />
+      style={[styles.banner, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+      <Feather name="wifi-off" size={16} color={colors.text} />
       <View style={styles.bannerText}>
         <Body>You&apos;re offline. This is your last saved data, and changes can&apos;t be saved until you reconnect.</Body>
       </View>
@@ -44,6 +44,6 @@ export function OfflineBanner() {
 const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 20 },
   gap: { gap: 12 },
-  banner: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10 },
+  banner: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: StyleSheet.hairlineWidth },
   bannerText: { flex: 1 },
 });

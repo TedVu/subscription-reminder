@@ -4,7 +4,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { getService } from '@/lib/catalog/services';
 import { OfflineError } from '@/lib/queries/online';
@@ -18,9 +18,10 @@ import {
 } from '@/lib/subscriptions/schema';
 
 import { ServiceIcon } from './service-icon';
-import { Body, Button, ErrorText, TextField, type, useColors } from './ui';
+import { Body, Button, ErrorText, SegmentedControl, TextField, type, useColors } from './ui';
 
 const UNIT_LABELS = { week: 'Weeks', month: 'Months', year: 'Years' } as const;
+const UNIT_OPTIONS = CYCLE_UNITS.map((unit) => ({ value: unit, label: UNIT_LABELS[unit] }));
 
 interface SubscriptionFormProps {
   initialValues: SubscriptionFormInput;
@@ -96,26 +97,13 @@ export function SubscriptionForm({ initialValues, submitLabel, onSubmit }: Subsc
             control={control}
             name="cycleUnit"
             render={({ field }) => (
-              <View style={styles.segments} accessibilityRole="radiogroup">
-                {CYCLE_UNITS.map((unit) => {
-                  const selected = field.value === unit;
-                  return (
-                    <Pressable
-                      key={unit}
-                      accessibilityRole="radio"
-                      accessibilityLabel={UNIT_LABELS[unit]}
-                      accessibilityState={{ selected }}
-                      onPress={() => field.onChange(unit)}
-                      style={[styles.segment, {
-                        borderColor: selected ? colors.primary : colors.border,
-                        backgroundColor: selected ? colors.primary : colors.surface,
-                      }]}>
-                      <Text style={[type.bodyStrong, { color: selected ? colors.onPrimary : colors.text }]}>
-                        {UNIT_LABELS[unit]}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
+              <View style={styles.unit}>
+                <SegmentedControl
+                  label="Billing unit"
+                  options={UNIT_OPTIONS}
+                  value={field.value}
+                  onChange={field.onChange}
+                />
               </View>
             )}
           />
@@ -172,7 +160,6 @@ const styles = StyleSheet.create({
   field: { gap: 6 },
   cycleRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
   countInput: { width: 64, textAlign: 'center' },
-  segments: { flex: 1, flexDirection: 'row', gap: 6 },
-  segment: { flex: 1, borderWidth: 1, borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
+  unit: { flex: 1 },
   notes: { minHeight: 80, textAlignVertical: 'top' },
 });

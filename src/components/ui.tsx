@@ -1,8 +1,9 @@
-// Design tokens and shared primitives.
+// Design tokens and shared primitives — "Polymer" (.superdesign/design-system.md).
 //
-// Palette: Australian bush, cool not warm. Gum (eucalyptus) for actions,
-// Wattle only ever means "charging soon". One family, Schibsted Grotesk,
-// whose sturdy numerals suit prices and dates. Sentence case everywhere.
+// Australian polymer banknotes: pale polymer grey, deep navy ink, and each
+// subscription coloured by the note that covers its monthly cost. Note colours
+// are information, never decoration. One family, Familjen Grotesk. Sentence
+// case everywhere; no shadows or gradients.
 
 import type { ReactNode } from 'react';
 import {
@@ -15,35 +16,43 @@ import {
   View,
   type TextInputProps,
   type TextProps,
+  type ViewProps,
 } from 'react-native';
+
+import type { NoteTier } from '@/lib/subscriptions/note-tier';
+
+/** Banknote colours, the same in light and dark mode. */
+export const notes: Record<NoteTier, string> = {
+  5: '#C77DB5',
+  10: '#2E8BC0',
+  20: '#E2573B',
+  50: '#E9B527',
+  100: '#2FA37A',
+};
 
 const palette = {
   light: {
-    background: '#F2F5F3', // paper
-    surface: '#FFFFFF',
-    text: '#1E2B2F', // ink
-    muted: '#677875', // mist
-    border: '#D3DCD8', // line
-    primary: '#2F5D50', // gum
+    background: '#ECEFF1', // polymer
+    surface: '#FFFFFF', // sheet
+    text: '#1A1F36', // ink
+    muted: '#5E6478',
+    border: '#D5DADF', // rule
+    primary: '#1A1F36', // actions are ink
     onPrimary: '#FFFFFF',
-    primarySoft: '#DCE8E3',
-    accent: '#E3A008', // wattle
-    accentSoft: '#FBEFCB',
-    onAccent: '#3A2A00',
+    pressed: '#DDE2E6',
+    window: 'rgba(255,255,255,0.55)',
     danger: '#B3261E',
   },
   dark: {
-    background: '#12201D',
-    surface: '#1A2C28',
-    text: '#E6EEEA',
-    muted: '#93A6A1',
-    border: '#2A403B',
-    primary: '#8CC4AE',
-    onPrimary: '#0E1C19',
-    primarySoft: '#21403A',
-    accent: '#F2C14E',
-    accentSoft: '#3D3315',
-    onAccent: '#2A1F00',
+    background: '#121521',
+    surface: '#1B1F2E',
+    text: '#E9ECF5',
+    muted: '#9AA0B4',
+    border: '#2B3044',
+    primary: '#E9ECF5',
+    onPrimary: '#121521',
+    pressed: '#22273A',
+    window: 'rgba(255,255,255,0.06)',
     danger: '#F2B8B5',
   },
 };
@@ -58,19 +67,19 @@ export { palette };
 
 /** Loaded in the root layout; text falls back to the system font until then. */
 export const fonts = {
-  regular: 'SchibstedGrotesk_400Regular',
-  semibold: 'SchibstedGrotesk_600SemiBold',
-  bold: 'SchibstedGrotesk_800ExtraBold',
+  regular: 'FamiljenGrotesk_400Regular',
+  semibold: 'FamiljenGrotesk_600SemiBold',
+  bold: 'FamiljenGrotesk_700Bold',
 };
 
-/** Type scale: 13 / 15 / 17 / 22 / 30. */
+/** Type scale: 13 / 15 / 17 / 22 / 34. */
 export const type = StyleSheet.create({
   small: { fontFamily: fonts.regular, fontSize: 13, lineHeight: 18 },
   body: { fontFamily: fonts.regular, fontSize: 15, lineHeight: 22 },
   bodyStrong: { fontFamily: fonts.semibold, fontSize: 15, lineHeight: 22 },
   heading: { fontFamily: fonts.semibold, fontSize: 17, lineHeight: 24 },
-  title: { fontFamily: fonts.bold, fontSize: 30, lineHeight: 34, letterSpacing: -0.6 },
-  figure: { fontFamily: fonts.semibold, fontVariant: ['tabular-nums'] },
+  subtitle: { fontFamily: fonts.semibold, fontSize: 22, lineHeight: 28 },
+  title: { fontFamily: fonts.bold, fontSize: 34, lineHeight: 38, letterSpacing: -0.5 },
 });
 
 export function Screen({ children }: { children: ReactNode }) {
@@ -87,10 +96,13 @@ export function Title({ children }: { children: ReactNode }) {
   );
 }
 
-export function Heading({ children, style, ...props }: TextProps & { children: ReactNode }) {
+export function Heading({ children, style, muted, ...props }: TextProps & { children: ReactNode; muted?: boolean }) {
   const colors = useColors();
   return (
-    <Text accessibilityRole="header" style={[type.heading, { color: colors.text }, style]} {...props}>
+    <Text
+      accessibilityRole="header"
+      style={[type.heading, { color: muted ? colors.muted : colors.text }, style]}
+      {...props}>
       {children}
     </Text>
   );
@@ -107,6 +119,58 @@ export function ErrorText({ children }: { children: ReactNode }) {
     <Text accessibilityRole="alert" style={[type.body, { color: colors.danger }]}>
       {children}
     </Text>
+  );
+}
+
+/** Small round banknote-colour marker. */
+export function NoteSwatch({ tier, size = 10 }: { tier: NoteTier; size?: number }) {
+  return <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: notes[tier] }} />;
+}
+
+/** The clear polymer "window" — used only to mark today. */
+export function PolymerWindow({ children, style, ...props }: ViewProps & { children: ReactNode }) {
+  const colors = useColors();
+  return (
+    <View style={[styles.window, { borderColor: colors.text, backgroundColor: colors.window }, style]} {...props}>
+      {children}
+    </View>
+  );
+}
+
+interface SegmentedControlProps<T extends string> {
+  /** Names the group for screen readers, e.g. "Appearance". */
+  label: string;
+  options: readonly { value: T; label: string }[];
+  value: T;
+  onChange: (value: T) => void;
+}
+
+/** A row of mutually exclusive choices (radio buttons). */
+export function SegmentedControl<T extends string>({ label, options, value, onChange }: SegmentedControlProps<T>) {
+  const colors = useColors();
+  return (
+    <View accessibilityRole="radiogroup" accessibilityLabel={label} style={styles.segments}>
+      {options.map((option) => {
+        const selected = option.value === value;
+        return (
+          <Pressable
+            key={option.value}
+            accessibilityRole="radio"
+            accessibilityLabel={option.label}
+            accessibilityState={{ selected }}
+            onPress={() => onChange(option.value)}
+            style={[
+              styles.segment,
+              {
+                borderColor: selected ? colors.primary : colors.border,
+                backgroundColor: selected ? colors.primary : colors.surface,
+              },
+            ]}>
+            <Text style={[type.bodyStrong, { color: selected ? colors.onPrimary : colors.text }]}>{option.label}</Text>
+          </Pressable>
+        );
+      })}
+    </View>
   );
 }
 
@@ -139,7 +203,7 @@ export function TextField({ label, error, style, ...inputProps }: TextFieldProps
 interface ButtonProps {
   label: string;
   onPress: () => void;
-  /** primary: filled gum. secondary: outlined. danger: quiet red text. */
+  /** primary: filled ink. secondary: sheet with a rule. danger: quiet red text. */
   variant?: 'primary' | 'secondary' | 'danger';
   disabled?: boolean;
   loading?: boolean;
@@ -149,7 +213,7 @@ export function Button({ label, onPress, variant = 'primary', disabled, loading 
   const colors = useColors();
   const isDisabled = disabled || loading;
   const filled = variant === 'primary';
-  const foreground = filled ? colors.onPrimary : variant === 'danger' ? colors.danger : colors.primary;
+  const foreground = filled ? colors.onPrimary : variant === 'danger' ? colors.danger : colors.text;
   return (
     <Pressable
       accessibilityRole="button"
@@ -161,7 +225,7 @@ export function Button({ label, onPress, variant = 'primary', disabled, loading 
         styles.button,
         filled && { backgroundColor: colors.primary },
         variant === 'secondary' && { borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface },
-        pressed && { opacity: 0.75 },
+        pressed && { opacity: 0.8 },
         isDisabled && { opacity: 0.5 },
       ]}>
       {loading ? (
@@ -178,4 +242,7 @@ const styles = StyleSheet.create({
   field: { gap: 6 },
   input: { borderWidth: 1, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12 },
   button: { borderRadius: 12, paddingVertical: 14, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center', minHeight: 50 },
+  window: { alignSelf: 'flex-start', borderWidth: 1, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 6 },
+  segments: { flexDirection: 'row', gap: 6 },
+  segment: { flex: 1, borderWidth: 1, borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
 });

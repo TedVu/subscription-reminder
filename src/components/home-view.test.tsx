@@ -49,6 +49,14 @@ function renderHome(subs: Subscription[], profile = prefs) {
   };
 }
 
+/** Subscription rows in page order (rows are buttons labelled with the name). */
+function rowNames(): string[] {
+  return screen
+    .getAllByRole('button')
+    .map((row) => row.props.accessibilityLabel as string)
+    .filter((label) => label !== 'Add your first subscription');
+}
+
 function namesIn(sectionLabel: string): string[] {
   return within(screen.getByLabelText(sectionLabel))
     .getAllByRole('button')
@@ -88,18 +96,25 @@ describe('spending-overview: upcoming renewals list', () => {
       sub({ name: 'Netflix', start_date: '2026-01-12' }),
       sub({ name: 'Spotify', start_date: '2026-01-05' }),
     ]).view;
-    expect(namesIn('Upcoming')).toEqual(['Spotify', 'Netflix']);
+    expect(rowNames()).toEqual(['Spotify', 'Netflix']);
+  });
+
+  it('shows each subscription once, grouped under day headings', async () => {
+    await renderHome([netflix, spotify]).view;
+    expect(rowNames()).toEqual(['Netflix', 'Spotify']);
+    expect(screen.getByText('Monday 5 Oct')).toBeOnTheScreen();
+    expect(screen.getByText('Tuesday 13 Oct')).toBeOnTheScreen();
   });
 
   it('paused and cancelled subscriptions are not listed', async () => {
     await renderHome([netflix, sub({ name: 'Stan', status: 'paused' })]).view;
-    expect(namesIn('Upcoming')).toEqual(['Netflix']);
+    expect(rowNames()).toEqual(['Netflix']);
   });
 
   it('opens a subscription when its row is pressed', async () => {
     const { onOpen, view } = renderHome([netflix]);
     await view;
-    await userEvent.setup().press(within(screen.getByLabelText('Upcoming')).getByRole('button', { name: 'Netflix' }));
+    await userEvent.setup().press(screen.getByRole('button', { name: 'Netflix' }));
     expect(onOpen).toHaveBeenCalledWith(netflix.id);
   });
 });

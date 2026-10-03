@@ -1,14 +1,16 @@
-// Import only the three weights in use; the package index would bundle all twelve.
-import { SchibstedGrotesk_400Regular } from '@expo-google-fonts/schibsted-grotesk/400Regular';
-import { SchibstedGrotesk_600SemiBold } from '@expo-google-fonts/schibsted-grotesk/600SemiBold';
-import { SchibstedGrotesk_800ExtraBold } from '@expo-google-fonts/schibsted-grotesk/800ExtraBold';
+// Import only the three weights in use; the package index would bundle all eight.
+import { FamiljenGrotesk_400Regular } from '@expo-google-fonts/familjen-grotesk/400Regular';
+import { FamiljenGrotesk_600SemiBold } from '@expo-google-fonts/familjen-grotesk/600SemiBold';
+import { FamiljenGrotesk_700Bold } from '@expo-google-fonts/familjen-grotesk/700Bold';
 import { useFonts } from 'expo-font';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider, type Theme } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect, useState } from 'react';
 import { useColorScheme } from 'react-native';
 
 import { fonts, palette } from '@/components/ui';
+import { loadAppearancePreference } from '@/lib/appearance';
 import { SessionProvider, useSession } from '@/lib/auth/session';
 import { QueryProvider } from '@/lib/queries/client';
 
@@ -26,13 +28,13 @@ function navigationTheme(dark: boolean): Theme {
       card: colors.background,
       text: colors.text,
       border: colors.border,
-      notification: colors.accent,
+      notification: colors.danger,
     },
     fonts: {
       regular: { fontFamily: fonts.regular, fontWeight: '400' },
       medium: { fontFamily: fonts.semibold, fontWeight: '600' },
       bold: { fontFamily: fonts.semibold, fontWeight: '600' },
-      heavy: { fontFamily: fonts.bold, fontWeight: '800' },
+      heavy: { fontFamily: fonts.bold, fontWeight: '700' },
     },
   };
 }
@@ -58,10 +60,16 @@ function RootNavigator({ ready }: { ready: boolean }) {
 
 export default function RootLayout() {
   const dark = useColorScheme() === 'dark';
+  // Apply the saved light/dark choice before the splash screen hides, so the
+  // app never flashes the wrong theme.
+  const [appearanceReady, setAppearanceReady] = useState(false);
+  useEffect(() => {
+    loadAppearancePreference().finally(() => setAppearanceReady(true));
+  }, []);
   const [fontsLoaded, fontError] = useFonts({
-    SchibstedGrotesk_400Regular,
-    SchibstedGrotesk_600SemiBold,
-    SchibstedGrotesk_800ExtraBold,
+    FamiljenGrotesk_400Regular,
+    FamiljenGrotesk_600SemiBold,
+    FamiljenGrotesk_700Bold,
   });
 
   return (
@@ -69,7 +77,8 @@ export default function RootLayout() {
       <QueryProvider>
         <SessionProvider>
           {/* If the font fails to load, carry on with the system font. */}
-          <RootNavigator ready={fontsLoaded || !!fontError} />
+          <StatusBar style="auto" />
+          <RootNavigator ready={(fontsLoaded || !!fontError) && appearanceReady} />
         </SessionProvider>
       </QueryProvider>
     </ThemeProvider>

@@ -12,7 +12,7 @@ interface MoneyTextProps extends Omit<TextProps, 'children'> {
 export function MoneyText({ cents, style, ...props }: MoneyTextProps) {
   const colors = useColors();
   return (
-    <Text style={[type.figure, { color: colors.text }, style]} {...props}>
+    <Text style={[type.body, { color: colors.text }, style]} {...props}>
       {formatAud(cents)}
     </Text>
   );

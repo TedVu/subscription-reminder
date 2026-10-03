@@ -1,21 +1,21 @@
-// Home (spending-overview spec, in-app reminders from the reminders spec).
-// Leads with time — the month and the next 14 days — because "what charges
-// me next" is the question this app answers. Totals close the page as a sentence.
+// Home — design A, "Wallet" (Superdesign draft 7a2d30eb).
+// Totals as a sentence, one banknote-coloured share bar, then a single agenda
+// grouped by day: renewing soon (in-app reminders), the next 30 days, later.
+// Every subscription appears once.
 
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { totals } from '@/lib/money';
 import type { Profile } from '@/lib/queries/subscriptions';
-import { parseIsoDate } from '@/lib/schedule';
-import { chargesByDay } from '@/lib/subscriptions/charges';
+import { isInTrial } from '@/lib/schedule';
+import { buildAgenda, dayHeading, type AgendaDay } from '@/lib/subscriptions/agenda';
+import { spendShares, type ShareSegment } from '@/lib/subscriptions/note-tier';
 import type { Subscription } from '@/lib/subscriptions/schema';
-import { renewingSoon, upcoming } from '@/lib/subscriptions/upcoming';
 
-import { DateStrip } from './date-strip';
 import { MoneyText } from './money-text';
 import { SubscriptionRow } from './subscription-row';
-import { Body, Button, Heading, type, useColors } from './ui';
+import { Body, Button, Heading, notes, NoteSwatch, PolymerWindow, type, useColors } from './ui';
 
 interface HomeViewProps {
   subs: readonly Subscription[];
@@ -25,73 +25,142 @@ interface HomeViewProps {
   onOpen: (id: string) => void;
 }
 
-const monthName = new Intl.DateTimeFormat('en-AU', { month: 'long', timeZone: 'UTC' });
-
 export function HomeView({ subs, profile, today, onAdd, onOpen }: HomeViewProps) {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const { monthlyCents, yearlyCents } = totals(subs, today);
-  const upcomingItems = upcoming(subs, today);
-  const soon = renewingSoon(subs, today, profile.remind_days);
-  const { y, m } = parseIsoDate(today);
-  const divider = { borderTopColor: colors.border };
+  const shares = spendShares(subs, (sub) => sub.status === 'active' && !isInTrial(sub, today));
+  const agenda = buildAgenda(subs, today, { remindDays: profile.remind_days, showSoon: profile.notify_in_app });
+  const isEmpty = agenda.soon.length + agenda.coming.length + agenda.later.length === 0;
 
   return (
     <ScrollView
       style={{ backgroundColor: colors.background }}
-      contentContainerStyle={[styles.content, { paddingTop: insets.top + 16 }]}>
-      <Text accessibilityRole="header" style={[styles.month, { color: colors.text }]}>
-        {monthName.format(new Date(Date.UTC(y, m - 1, 1)))}
-      </Text>
-
-      <View style={styles.bleed}>
-        <DateStrip days={chargesByDay(subs, today, 14)} />
+      contentContainerStyle={[styles.content, { paddingTop: insets.top + 32 }]}>
+      <View accessibilityLabel="Totals">
+        <Text accessibilityRole="header" style={[type.subtitle, { color: colors.text }]}>
+          You pay <MoneyText cents={monthlyCents} testID="monthly-total" style={type.subtitle} /> a month
+        </Text>
+        <Text style={[type.subtitle, { color: colors.muted }]}>
+          <MoneyText cents={yearlyCents} testID="yearly-total" style={[type.subtitle, { color: colors.muted }]} /> a year
+        </Text>
       </View>
 
-      {upcomingItems.length === 0 ? (
-        <View style={styles.section}>
+      {shares.length > 0 ? <ShareBar shares={shares} /> : null}
+
+      {isEmpty ? (
+        <View style={styles.group}>
           <Body>Nothing to track yet. Add the subscriptions you pay for and you&apos;ll be reminded before each charge.</Body>
           <Button label="Add your first subscription" onPress={onAdd} />
         </View>
-      ) : null}
+      ) : (
+        <View style={styles.agenda}>
+          {profile.notify_in_app ? (
+            <View style={styles.group} accessibilityLabel="Renewing soon">
+              <Heading muted>Renewing soon</Heading>
+              {agenda.soon.length === 0 ? (
+                <Body muted>Nothing is renewing soon.</Body>
+              ) : (
+                agenda.soon.map((day) => <DayGroup key={day.date} day={day} today={today} withDaysUntil onOpen={onOpen} />)
+              )}
+            </View>
+          ) : null}
 
-      {profile.notify_in_app && upcomingItems.length > 0 ? (
-        <View style={styles.section} accessibilityLabel="Renewing soon">
-          <Heading>Renewing soon</Heading>
-          {soon.length === 0 ? (
-            <Body muted>Nothing is renewing soon.</Body>
-          ) : (
-            soon.map(({ sub, event, daysUntil }) => (
-              <SubscriptionRow key={sub.id} sub={sub} event={event} daysUntil={daysUntil} highlight onPress={() => onOpen(sub.id)} />
-            ))
-          )}
+          {agenda.coming.length + agenda.later.length > 0 ? (
+            <View style={styles.group} accessibilityLabel="Upcoming">
+              {agenda.coming.map((day) => (
+                <DayGroup key={day.date} day={day} today={today} onOpen={onOpen} />
+              ))}
+              {agenda.later.length > 0 ? (
+                <>
+                  <Heading muted style={styles.laterHeading}>
+                    Later
+                  </Heading>
+                  {agenda.later.map((day) => (
+                    <DayGroup key={day.date} day={day} today={today} onOpen={onOpen} />
+                  ))}
+                </>
+              ) : null}
+            </View>
+          ) : null}
         </View>
-      ) : null}
-
-      {upcomingItems.length > 0 ? (
-        <View style={styles.section} accessibilityLabel="Upcoming">
-          <Heading>Upcoming</Heading>
-          {upcomingItems.map(({ sub, event, daysUntil }) => (
-            <SubscriptionRow key={sub.id} sub={sub} event={event} daysUntil={daysUntil} onPress={() => onOpen(sub.id)} />
-          ))}
-        </View>
-      ) : null}
-
-      <View style={[styles.totals, divider]} accessibilityLabel="Totals">
-        <Text style={[type.heading, { color: colors.text }]}>
-          You pay <MoneyText cents={monthlyCents} testID="monthly-total" style={type.heading} /> a month,{' '}
-          <MoneyText cents={yearlyCents} testID="yearly-total" style={type.heading} /> a year.
-        </Text>
-        <Text style={[type.small, { color: colors.muted }]}>Active subscriptions only. Free trials count once they convert.</Text>
-      </View>
+      )}
     </ScrollView>
   );
 }
 
+function ShareBar({ shares }: { shares: readonly ShareSegment[] }) {
+  const colors = useColors();
+  const summary = shares.map((s) => `${s.name} ${Math.round(s.share * 100)}%`).join(', ');
+  return (
+    <View style={styles.shareBlock}>
+      <View accessible accessibilityLabel={`Share of monthly spend: ${summary}`} style={styles.bar}>
+        {shares.map((s, index) => (
+          <View
+            key={s.id}
+            style={{
+              flex: s.share,
+              backgroundColor: notes[s.tier],
+              borderLeftWidth: index === 0 ? 0 : 1,
+              borderLeftColor: colors.background,
+            }}
+          />
+        ))}
+      </View>
+      <View style={styles.legend} importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
+        {shares.map((s) => (
+          <View key={s.id} style={styles.legendItem}>
+            <NoteSwatch tier={s.tier} />
+            <Text style={[type.small, { color: colors.text }]}>{s.name}</Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+}
+
+function DayGroup({
+  day,
+  today,
+  withDaysUntil,
+  onOpen,
+}: {
+  day: AgendaDay;
+  today: string;
+  withDaysUntil?: boolean;
+  onOpen: (id: string) => void;
+}) {
+  const heading = dayHeading(day.date, today);
+  return (
+    <View style={styles.day}>
+      {day.date === today ? (
+        <PolymerWindow>
+          <Heading>{heading}</Heading>
+        </PolymerWindow>
+      ) : (
+        <Heading>{heading}</Heading>
+      )}
+      {day.items.map(({ sub, event, daysUntil }) => (
+        <SubscriptionRow
+          key={sub.id}
+          sub={sub}
+          event={event}
+          daysUntil={withDaysUntil ? daysUntil : undefined}
+          onPress={() => onOpen(sub.id)}
+        />
+      ))}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  content: { paddingHorizontal: 20, paddingBottom: 32, gap: 28 },
-  month: { ...type.title, fontSize: 40, lineHeight: 44, letterSpacing: -1 },
-  bleed: { marginHorizontal: -20, marginTop: -12 },
-  section: { gap: 4 },
-  totals: { borderTopWidth: StyleSheet.hairlineWidth, paddingTop: 16, gap: 4 },
+  content: { paddingHorizontal: 20, paddingBottom: 40, gap: 24 },
+  shareBlock: { gap: 12, marginBottom: 8 },
+  bar: { flexDirection: 'row', height: 14, borderRadius: 7, overflow: 'hidden' },
+  legend: { flexDirection: 'row', flexWrap: 'wrap', columnGap: 12, rowGap: 4 },
+  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  agenda: { gap: 32 },
+  group: { gap: 16 },
+  day: { gap: 8 },
+  laterHeading: { marginTop: 16 },
 });

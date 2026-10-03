@@ -2,6 +2,7 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Alert, ScrollView, StyleSheet } from 'react-native';
 
+import { AppearanceSettings } from '@/components/appearance-settings';
 import { Loading, LoadError, OfflineBanner } from '@/components/query-state';
 import { ReminderSettings } from '@/components/reminder-settings';
 import { Body, Button, ErrorText, Heading, useColors } from '@/components/ui';
@@ -62,6 +63,8 @@ export default function SettingsRoute() {
         }
         onSave={(values) => update.mutateAsync({ id: profile.id, values })}
       />
+      <Heading style={styles.spaced}>Appearance</Heading>
+      <AppearanceSettings />
       <Heading style={styles.spaced}>Account</Heading>
       <Body muted>Signed in as {profile.email}</Body>
       <Button label="Sign out" variant="secondary" onPress={signOut} />

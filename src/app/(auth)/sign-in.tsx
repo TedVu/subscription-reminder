@@ -1,5 +1,10 @@
-import { SignInForm } from '@/components/sign-in-form';
+import { MaterialHost } from '@/components/material/material-host';
+import { SignInScreen } from '@/components/material/sign-in-screen';
 
 export default function SignInRoute() {
-  return <SignInForm />;
+  return (
+    <MaterialHost>
+      <SignInScreen />
+    </MaterialHost>
+  );
 }

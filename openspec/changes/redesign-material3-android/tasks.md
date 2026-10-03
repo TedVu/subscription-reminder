@@ -27,7 +27,7 @@ Every task is verified by commands that run without a device. "Checks pass" mean
 - [x] 4.3 Rebuild the Subscriptions list (sections + FAB). Verify checks pass and Android bundle builds
 - [x] 4.4 Rebuild add/edit: catalog search + results, form `TextField`s, Weeks/Months/Years segmented buttons, `DatePicker` dialogs for start and trial dates, save/pause/cancel/reactivate buttons, delete `AlertDialog`, offline/validation messages from the existing schema. Verify existing schema tests still pass, checks pass, Android bundle builds
 - [x] 4.5 Rebuild Settings (channel switches, days-before field, appearance segmented buttons, sign out, delete account dialog). Verify checks pass and Android bundle builds
-- [ ] 4.6 Rebuild sign-in (email step, code step, resend, errors) on `MaterialHost`. Verify `auth-api` tests pass, checks pass, Android bundle builds
+- [x] 4.6 Rebuild sign-in (email step, code step, resend, errors) on `MaterialHost`. Verify `auth-api` tests pass, checks pass, Android bundle builds
 
 ## 5. Remove Polymer
 

@@ -2,6 +2,8 @@
 
 A mobile app for keeping track of the subscriptions you pay for (Netflix, Spotify, YouTube Premium, ...) and getting reminded before they renew or a free trial converts to paid. Prices are in AUD.
 
+**Android only for now.** The interface is native Material Design 3 (Jetpack Compose via `@expo/ui`); iOS support will come in a later change.
+
 Subscriptions are recorded manually — the app never signs up for, pays for or cancels anything.
 
 ## Stack

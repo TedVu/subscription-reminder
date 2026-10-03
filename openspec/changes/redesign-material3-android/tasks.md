@@ -4,9 +4,9 @@ Every task is verified by commands that run without a device. "Checks pass" mean
 
 ## 1. Theme foundation
 
-- [ ] 1.1 Add `src/lib/theme.ts` with `FALLBACK_SEED = '#006A6A'` and `themeFor(dynamicAvailable, scheme)` returning `{ colorScheme, seedColor }` (seed only when dynamic colour is unavailable). Verify unit tests cover: dynamic available → no seed; unavailable → teal seed; light/dark pass through
-- [ ] 1.2 Add `src/components/material/material-host.tsx` wrapping `@expo/ui/jetpack-compose` `Host` with the resolved appearance and `themeFor(isDynamicColorAvailable, ...)`, plus a `useAppPalette()` hook returning `useMaterialColors` for React Native-side surfaces. Verify checks pass
-- [ ] 1.3 Set `"platforms": ["android"]` in `app.json` and note "Android only for now" in `README.md`. Verify `npx expo config --type public` shows platforms `["android"]` and `npx expo-doctor` passes
+- [x] 1.1 Add `src/lib/theme.ts` with `FALLBACK_SEED = '#006A6A'` and `themeFor(dynamicAvailable, scheme)` returning `{ colorScheme, seedColor }` (seed only when dynamic colour is unavailable). Verify unit tests cover: dynamic available → no seed; unavailable → teal seed; light/dark pass through
+- [x] 1.2 Add `src/components/material/material-host.tsx` wrapping `@expo/ui/jetpack-compose` `Host` with the resolved appearance and `themeFor(isDynamicColorAvailable, ...)`, plus a `useAppPalette()` hook returning `useMaterialColors` for React Native-side surfaces. Verify checks pass
+- [x] 1.3 Set `"platforms": ["android"]` in `app.json` and note "Android only for now" in `README.md`. Verify `npx expo config --type public` shows platforms `["android"]` and `npx expo-doctor` passes
 
 ## 2. Navigation shell
 

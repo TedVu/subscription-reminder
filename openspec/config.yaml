@@ -9,19 +9,25 @@ schema: spec-driven
 #     We use conventional commits
 #     Domain: e-commerce platform
 context: |
-  Domain: local-first mobile app for tracking recurring subscriptions and
-  reminding the user before they renew. No backend in the MVP; Supabase sync
-  may come later.
+  Domain: mobile app where users manually track subscriptions they already pay
+  for elsewhere (no real sign-up or payments) and get reminded before renewals
+  and free-trial ends by phone notification, in-app list and email.
+  Prices are AUD only, stored as integer cents.
   Tech stack: Expo SDK 57 (React Native 0.86, React 19, TypeScript strict),
-  Expo Router (routes in src/app/, non-route code elsewhere in src/),
-  expo-sqlite + Drizzle ORM (schema src/db/schema.ts, migrations drizzle/),
-  expo-notifications for scheduled local reminders, Zustand for state,
-  date-fns for date math. Tests: Jest (jest-expo) + React Native Testing Library.
+  Expo Router (routes in src/app/, non-route code elsewhere in src/).
+  Backend: Supabase is the source of truth (Auth with email OTP codes, Postgres
+  with row-level security, Edge Functions in supabase/functions, pg_cron), with
+  Resend for email. App data via supabase-js + TanStack Query with a persisted
+  cache; edits need a connection, reads work offline. Phone reminders are local
+  notifications scheduled on the device (expo-notifications); email reminders
+  come from an hourly Edge Function. Renewal/date logic lives in a pure,
+  dependency-free module (src/lib/schedule) shared by the app and Edge Functions.
+  Tests: Jest (jest-expo) + React Native Testing Library.
   Builds via EAS; the developer is on Windows (no local iOS builds).
   Conventions: add packages with `npx expo install`; never hand-edit ios/ or
-  android/ (Continuous Native Generation); store money as integer minor units
-  plus an ISO 4217 currency code; iOS caps pending local notifications at 64,
-  so schedule only the nearest reminders and reschedule on app open.
+  android/ (Continuous Native Generation); never ship the Supabase service role
+  key in the app; iOS caps pending local notifications at 64, so schedule only
+  the nearest reminders and reschedule on app open.
   Before done: npm run lint, npm run typecheck, npm test.
 
 # Per-artifact rules (optional)

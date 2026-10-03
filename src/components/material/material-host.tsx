@@ -1,8 +1,13 @@
 // Material 3 theme for one screen (redesign-material3-android, decision 2).
 // Wraps the Compose Host: the resolved appearance picks light/dark, and the
 // teal seed is applied only where Material You dynamic colour is unavailable.
+//
+// Content sits on a full-size Material Surface. Compose Text without an
+// explicit colour takes the nearest Surface's content colour; without this
+// Surface it falls back to black, which is invisible in dark mode.
 
-import { Host, isDynamicColorAvailable, useMaterialColors, type MaterialColors } from '@expo/ui/jetpack-compose';
+import { Host, isDynamicColorAvailable, Surface, useMaterialColors, type MaterialColors } from '@expo/ui/jetpack-compose';
+import { fillMaxSize } from '@expo/ui/jetpack-compose/modifiers';
 import type { ReactNode } from 'react';
 import { StyleSheet, useColorScheme, type StyleProp, type ViewStyle } from 'react-native';
 
@@ -15,19 +20,16 @@ function useThemeInputs() {
 interface MaterialHostProps {
   children: ReactNode;
   style?: StyleProp<ViewStyle>;
-  /** Size to the Compose content instead of filling the screen. */
-  matchContents?: boolean;
 }
 
-export function MaterialHost({ children, style, matchContents }: MaterialHostProps) {
+export function MaterialHost({ children, style }: MaterialHostProps) {
   const { colorScheme, seedColor } = useThemeInputs();
+  const palette = useMaterialColors({ colorScheme, seedColor });
   return (
-    <Host
-      colorScheme={colorScheme}
-      seedColor={seedColor}
-      matchContents={matchContents}
-      style={matchContents ? style : [styles.fill, style]}>
-      {children}
+    <Host colorScheme={colorScheme} seedColor={seedColor} style={[styles.fill, style]}>
+      <Surface color={palette.surface} contentColor={palette.onSurface} modifiers={[fillMaxSize()]}>
+        {children}
+      </Surface>
     </Host>
   );
 }

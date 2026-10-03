@@ -19,7 +19,7 @@ import {
   useMaterialColors,
   useNativeState,
 } from '@expo/ui/jetpack-compose';
-import { clickable, fillMaxSize, fillMaxWidth, padding, testID, weight, width } from '@expo/ui/jetpack-compose/modifiers';
+import { clickable, fillMaxSize, fillMaxWidth, padding, testID, weight } from '@expo/ui/jetpack-compose/modifiers';
 import { useState } from 'react';
 
 import { OfflineError } from '@/lib/queries/online';
@@ -107,6 +107,17 @@ export function SubscriptionEditor({ initialValues, submitLabel, onSubmit, edit 
   const [formError, setFormError] = useState<string>();
   const [busy, setBusy] = useState(false);
   const [picking, setPicking] = useState<'startDate' | 'trialEndsOn' | null>(null);
+  // The picker reports a date as soon as it shows and on every tap, so a
+  // choice is only applied when the user presses OK.
+  const [pendingDate, setPendingDate] = useState<string>();
+  const openPicker = (field: 'startDate' | 'trialEndsOn') => {
+    setPendingDate(undefined);
+    setPicking(field);
+  };
+  const closePicker = () => {
+    setPicking(null);
+    setPendingDate(undefined);
+  };
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const set = (field: FormField) => (value: string) => setValues((current) => ({ ...current, [field]: value }));
@@ -134,7 +145,7 @@ export function SubscriptionEditor({ initialValues, submitLabel, onSubmit, edit 
   }
 
   const dateRow = (field: 'startDate' | 'trialEndsOn', label: string, emptyText: string) => (
-    <ListItem key={field} modifiers={[clickable(() => setPicking(field)), testID(`field-${field}`)]}>
+    <ListItem key={field} modifiers={[clickable(() => openPicker(field)), testID(`field-${field}`)]}>
       <ListItem.HeadlineContent>
         <Text style={{ typography: 'bodyLarge' }}>{label}</Text>
       </ListItem.HeadlineContent>
@@ -159,7 +170,7 @@ export function SubscriptionEditor({ initialValues, submitLabel, onSubmit, edit 
         <OfflineBanner />
         <Row key="header" verticalAlignment="center" horizontalArrangement={{ spacedBy: 12 }}>
           <ServiceTile catalogKey={values.catalogKey} name={values.name || '?'} />
-          <Text color={palette.onSurfaceVariant} style={{ typography: 'bodyMedium' }}>
+          <Text color={palette.onSurfaceVariant} style={{ typography: 'bodyMedium' }} modifiers={[weight(1)]}>
             {values.catalogKey ? `Enter what you pay for ${values.name}.` : 'A subscription that isn’t in the list.'}
           </Text>
         </Row>
@@ -169,11 +180,9 @@ export function SubscriptionEditor({ initialValues, submitLabel, onSubmit, edit 
           <Text color={palette.onSurfaceVariant} style={{ typography: 'labelLarge' }}>
             Bills every
           </Text>
-          <Row verticalAlignment="center" horizontalArrangement={{ spacedBy: 12 }}>
-            <Column modifiers={[width(88)]}>
-              <Field id="field-cycleCount" label="Number" keyboardType="number" initial={String(values.cycleCount)} onChange={set('cycleCount')} />
-            </Column>
-            <SingleChoiceSegmentedButtonRow modifiers={[weight(1)]}>
+          {/* Stacked, not side by side: Material text fields have a 280dp minimum width. */}
+          <Field id="field-cycleCount" label="Number of weeks, months or years" keyboardType="number" initial={String(values.cycleCount)} onChange={set('cycleCount')} />
+          <SingleChoiceSegmentedButtonRow modifiers={[fillMaxWidth()]}>
               {CYCLE_UNITS.map((unit) => (
                 <SegmentedButton key={unit} selected={values.cycleUnit === unit} onClick={() => setValues((v) => ({ ...v, cycleUnit: unit }))}>
                   <SegmentedButton.Label>
@@ -181,8 +190,7 @@ export function SubscriptionEditor({ initialValues, submitLabel, onSubmit, edit 
                   </SegmentedButton.Label>
                 </SegmentedButton>
               ))}
-            </SingleChoiceSegmentedButtonRow>
-          </Row>
+          </SingleChoiceSegmentedButtonRow>
           {errors.cycleCount ? (
             <Text color={palette.error} style={{ typography: 'bodySmall' }}>
               {errors.cycleCount}
@@ -225,7 +233,7 @@ export function SubscriptionEditor({ initialValues, submitLabel, onSubmit, edit 
       </LazyColumn>
 
       {picking ? (
-        <AlertDialog onDismissRequest={() => setPicking(null)}>
+        <AlertDialog onDismissRequest={closePicker}>
           <AlertDialog.Title>
             <Text>{picking === 'startDate' ? 'Start date' : 'Free trial ends'}</Text>
           </AlertDialog.Title>
@@ -233,14 +241,21 @@ export function SubscriptionEditor({ initialValues, submitLabel, onSubmit, edit 
             <DateTimePicker
               initialDate={values[picking] || values.startDate || null}
               variant="picker"
-              onDateSelected={(date) => {
-                set(picking)(isoFromPickedDate(date));
-                setPicking(null);
-              }}
+              onDateSelected={(date) => setPendingDate(isoFromPickedDate(date))}
             />
           </AlertDialog.Text>
+          <AlertDialog.ConfirmButton>
+            <TextButton
+              enabled={!!pendingDate}
+              onClick={() => {
+                if (pendingDate) set(picking)(pendingDate);
+                closePicker();
+              }}>
+              <Text>OK</Text>
+            </TextButton>
+          </AlertDialog.ConfirmButton>
           <AlertDialog.DismissButton>
-            <TextButton onClick={() => setPicking(null)}>
+            <TextButton onClick={closePicker}>
               <Text>Cancel</Text>
             </TextButton>
           </AlertDialog.DismissButton>

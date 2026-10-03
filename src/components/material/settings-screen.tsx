@@ -4,6 +4,7 @@
 import {
   AlertDialog,
   Column,
+  FilledTonalButton,
   LazyColumn,
   ListItem,
   OutlinedButton,
@@ -17,7 +18,7 @@ import {
   useMaterialColors,
   useNativeState,
 } from '@expo/ui/jetpack-compose';
-import { fillMaxSize, fillMaxWidth, padding, testID, weight } from '@expo/ui/jetpack-compose/modifiers';
+import { fillMaxSize, fillMaxWidth, padding, testID } from '@expo/ui/jetpack-compose/modifiers';
 import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -96,26 +97,27 @@ export function SettingsScreen({ model, onToggle, onSaveDays, onAppearance, onSi
             {model.pushNotice}
           </Text>
         ) : null}
-        <Column key="days" modifiers={[padding(16, 8, 16, 8)]} verticalArrangement={{ spacedBy: 8 }}>
-          <Row verticalAlignment="center" horizontalArrangement={{ spacedBy: 12 }}>
-            <OutlinedTextField
-              value={daysState}
-              onValueChange={setDaysText}
-              isError={!!daysError}
-              singleLine
-              keyboardOptions={{ keyboardType: 'text', imeAction: 'done' }}
-              keyboardActions={{ onDone: () => saveDays() }}
-              modifiers={[weight(1), testID('days-before')]}>
-              <OutlinedTextField.Label>
-                <Text>Remind me this many days before</Text>
-              </OutlinedTextField.Label>
-              <OutlinedTextField.SupportingText>
-                <Text>{daysError ?? model.daysBeforeHelp}</Text>
-              </OutlinedTextField.SupportingText>
-            </OutlinedTextField>
-            <TextButton onClick={saveDays}>
-              <Text>Save</Text>
-            </TextButton>
+        {/* Stacked, not side by side: Material text fields have a 280dp minimum width. */}
+        <Column key="days" modifiers={[fillMaxWidth(), padding(16, 8, 16, 8)]} verticalArrangement={{ spacedBy: 4 }}>
+          <OutlinedTextField
+            value={daysState}
+            onValueChange={setDaysText}
+            isError={!!daysError}
+            singleLine
+            keyboardOptions={{ keyboardType: 'text', imeAction: 'done' }}
+            keyboardActions={{ onDone: () => saveDays() }}
+            modifiers={[fillMaxWidth(), testID('days-before')]}>
+            <OutlinedTextField.Label>
+              <Text>Days before</Text>
+            </OutlinedTextField.Label>
+            <OutlinedTextField.SupportingText>
+              <Text>{daysError ?? model.daysBeforeHelp}</Text>
+            </OutlinedTextField.SupportingText>
+          </OutlinedTextField>
+          <Row modifiers={[fillMaxWidth()]} horizontalArrangement="end">
+            <FilledTonalButton onClick={saveDays} modifiers={[testID('save-days')]}>
+              <Text>Save reminder days</Text>
+            </FilledTonalButton>
           </Row>
         </Column>
         {message ? (

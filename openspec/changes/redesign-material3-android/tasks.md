@@ -31,8 +31,8 @@ Every task is verified by commands that run without a device. "Checks pass" mean
 
 ## 5. Remove Polymer
 
-- [ ] 5.1 Delete Polymer-only code: `note-tier.ts` (+ test), `ui.tsx` tokens/primitives, `money-text.tsx`, `service-icon.tsx`, `subscription-row.tsx`, `query-state.tsx`, `home-view.tsx`, `subscription-list.tsx`, `subscription-form.tsx`, `catalog-picker.tsx`, `add-subscription.tsx`, `reminder-settings.tsx`, `appearance-settings.tsx`, `sign-in-form.tsx` and their component tests, once nothing imports them. Verify `grep -rn "Polymer\|notes\[\|NoteSwatch\|PolymerWindow\|Familjen" src` returns nothing and checks pass
-- [ ] 5.2 Delete `.superdesign/design-system.md` and the Polymer drafts from `.superdesign/resume.json` targets (keep the file valid JSON). Verify `node -e "JSON.parse(require('fs').readFileSync('.superdesign/resume.json','utf8'))"` succeeds and no Polymer references remain
+- [x] 5.1 Delete Polymer-only code: `note-tier.ts` (+ test), `ui.tsx` tokens/primitives, `money-text.tsx`, `service-icon.tsx`, `subscription-row.tsx`, `query-state.tsx`, `home-view.tsx`, `subscription-list.tsx`, `subscription-form.tsx`, `catalog-picker.tsx`, `add-subscription.tsx`, `reminder-settings.tsx`, `appearance-settings.tsx`, `sign-in-form.tsx` and their component tests, once nothing imports them. Verify `grep -rn "Polymer\|notes\[\|NoteSwatch\|PolymerWindow\|Familjen" src` returns nothing and checks pass
+- [x] 5.2 Delete `.superdesign/design-system.md` and the Polymer drafts from `.superdesign/resume.json` targets (keep the file valid JSON). Verify `node -e "JSON.parse(require('fs').readFileSync('.superdesign/resume.json','utf8'))"` succeeds and no Polymer references remain
 
 ## 6. Final verification
 

@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`reminders: email content renewal email 1`] = `
+{
+  "html": "<!doctype html>
+<html>
+  <body style="font-family: -apple-system, Segoe UI, Roboto, sans-serif; color: #111114; line-height: 1.5;">
+    <h2 style="margin: 0 0 12px;">Netflix renews in 3 days</h2>
+    <p style="margin: 0 0 8px;">Netflix renews on 12 Oct for $15.49.</p>
+    <p style="margin: 0 0 8px;">It costs $15.49/month.</p>
+    <p style="margin: 16px 0 0;">If you want to cancel, do it before then with the service itself.</p>
+    <hr style="border: none; border-top: 1px solid #dadae0; margin: 24px 0 12px;" />
+    <p style="font-size: 12px; color: #6b6b76;">You&#39;re getting this because email reminders are on in Subscription Reminder.
+      <a href="https://example.supabase.co/functions/v1/unsubscribe?u=user-1&amp;t=token">Turn off email reminders</a></p>
+  </body>
+</html>",
+  "subject": "Netflix renews in 3 days",
+  "text": "Netflix renews on 12 Oct for $15.49.
+It costs $15.49/month.
+
+If you want to cancel, do it before then with the service itself.
+
+You're getting this because email reminders are on in Subscription Reminder.
+Turn off email reminders: https://example.supabase.co/functions/v1/unsubscribe?u=user-1&t=token",
+}
+`;
+
+exports[`reminders: email content trial email 1`] = `
+{
+  "html": "<!doctype html>
+<html>
+  <body style="font-family: -apple-system, Segoe UI, Roboto, sans-serif; color: #111114; line-height: 1.5;">
+    <h2 style="margin: 0 0 12px;">Spotify free trial ends tomorrow</h2>
+    <p style="margin: 0 0 8px;">Your free trial of Spotify ends on 10 Oct.</p>
+    <p style="margin: 0 0 8px;">After that you&#39;ll be charged $13.99/month.</p>
+    <p style="margin: 16px 0 0;">If you want to cancel, do it before then with the service itself.</p>
+    <hr style="border: none; border-top: 1px solid #dadae0; margin: 24px 0 12px;" />
+    <p style="font-size: 12px; color: #6b6b76;">You&#39;re getting this because email reminders are on in Subscription Reminder.
+      <a href="https://example.supabase.co/functions/v1/unsubscribe?u=user-1&amp;t=token">Turn off email reminders</a></p>
+  </body>
+</html>",
+  "subject": "Spotify free trial ends tomorrow",
+  "text": "Your free trial of Spotify ends on 10 Oct.
+After that you'll be charged $13.99/month.
+
+If you want to cancel, do it before then with the service itself.
+
+You're getting this because email reminders are on in Subscription Reminder.
+Turn off email reminders: https://example.supabase.co/functions/v1/unsubscribe?u=user-1&t=token",
+}
+`;

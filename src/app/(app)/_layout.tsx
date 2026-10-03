@@ -20,7 +20,9 @@ export default function AppLayout() {
       indicatorColor={palette.secondaryContainer}
       iconColor={palette.onSurfaceVariant}
       tintColor={palette.onSecondaryContainer}
-      labelStyle={{ color: palette.onSurfaceVariant }}>
+      labelStyle={{ color: palette.onSurfaceVariant }}
+      // No press ripple on the tabs (by request); the active indicator still shows the selection.
+      rippleColor="transparent">
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon md="calendar_month" />

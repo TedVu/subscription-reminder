@@ -54,3 +54,77 @@ as `not ok N - ...` plus a `# Looks like you failed ...` line.
 
 With Docker Desktop running, `npx supabase test db --linked` runs the same file
 through `pg_prove`.
+
+## Email reminders
+
+`send-reminders` (Edge Function) is called by the pg_cron job
+`send-reminders-hourly` at 5 past every hour. It emails each user whose local
+time is 09:xx or 10:xx about renewals and trial ends due in their "days before"
+settings, and records every email in `email_reminder_log` so it is sent at most
+once. `unsubscribe` turns email reminders off from the link in each email;
+`delete-account` deletes the caller's account.
+
+### Secrets
+
+Function secrets (`npx supabase secrets list` shows names and fingerprints):
+
+| Name | What it is |
+|---|---|
+| `RESEND_API_KEY` | Resend API key with sending access to the verified domain |
+| `EMAIL_FROM` | e.g. `Subscription Reminder <noreply@mail.tedvu.com>` |
+| `CRON_SECRET` | Random string; must match the Vault secret `cron_secret` |
+| `UNSUBSCRIBE_SECRET` | Random string used to sign unsubscribe links |
+
+```bash
+npx supabase secrets set RESEND_API_KEY=re_...      # run in your own terminal
+npx supabase secrets set UNSUBSCRIBE_SECRET=$(node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))")
+```
+
+Rotating `UNSUBSCRIBE_SECRET` invalidates unsubscribe links in emails already
+sent. Rotating `CRON_SECRET` means updating the Vault secret too:
+
+```sql
+-- Vault secrets read by the cron job (create once per project)
+select vault.create_secret('https://<ref>.supabase.co', 'project_url');
+select vault.create_secret('<CRON_SECRET value>', 'cron_secret');
+-- after rotating CRON_SECRET
+select vault.update_secret((select id from vault.secrets where name = 'cron_secret'), '<new value>');
+```
+
+### Deploying the functions
+
+```bash
+npx supabase functions deploy send-reminders --use-api --no-verify-jwt
+npx supabase functions deploy unsubscribe --use-api --no-verify-jwt
+npx supabase functions deploy delete-account --use-api --no-verify-jwt
+```
+
+`--no-verify-jwt` is intentional: `send-reminders` checks the `x-cron-secret`
+header, `unsubscribe` checks its signed token, and `delete-account` validates
+the caller's token itself. `--use-api` bundles on Supabase's side (no Docker).
+
+### Checking that it runs
+
+Each run returns counts — `profiles`, `due`, `sent`, `skipped` (already sent),
+`failed` — plus up to five short `errors`. pg_net stores the responses:
+
+```bash
+# Last runs of the cron job
+npx supabase db query --linked "select r.start_time, r.status from cron.job_run_details r join cron.job j using (jobid) where j.jobname = 'send-reminders-hourly' order by r.start_time desc limit 5"
+
+# What the function answered
+npx supabase db query --linked "select created, status_code, left(content, 300) as body from net._http_response order by created desc limit 5"
+```
+
+`failed` > 0 with `Resend 401` means `RESEND_API_KEY` is wrong or the key was
+deleted in Resend; `Resend 403` usually means the sending domain is not verified.
+A failed email is retried at the next run inside the user's 09:00-10:59 window.
+
+### Pausing and resuming
+
+```bash
+npx supabase db query --linked "select cron.alter_job(job_id := (select jobid from cron.job where jobname = 'send-reminders-hourly'), active := false)"
+npx supabase db query --linked "select cron.alter_job(job_id := (select jobid from cron.job where jobname = 'send-reminders-hourly'), active := true)"
+```
+
+Reminders that fall due while paused are not sent later.

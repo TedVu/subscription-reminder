@@ -60,8 +60,8 @@
 - [x] 9.1 Implement `supabase/functions/send-reminders`: verify the cron secret, load email-enabled profiles and active subscriptions, check the local hour (09 or 10) per profile timezone, compute due reminders with the shared module, claim via `INSERT ... ON CONFLICT DO NOTHING RETURNING`, send through Resend, and delete the claim if the send fails. Verify with a Deno or Jest test of the selection logic (timezone hours, trial reminders, paused excluded) using fixed dates
 - [x] 9.2 Write the reminder email content (subject and body naming the subscription, price and date; trial wording; unsubscribe link; `List-Unsubscribe` headers). Verify a snapshot test of the rendered email for a renewal and a trial
 - [x] 9.3 Implement `supabase/functions/unsubscribe` with HMAC-SHA256 tokens that sets `notify_email = false` and returns a confirmation page. Verify tests that a valid token unsubscribes and a tampered token is rejected
-- [ ] 9.4 Schedule `send-reminders` hourly with `pg_cron` and `pg_net` in a migration, with secrets set via `supabase secrets set`. Verify by invoking the function twice for a seeded due reminder and confirming exactly one email arrives and one log row exists
-- [ ] 9.5 Document setup and operations (secrets, cron schedule, how to read the function's run counts, how to pause sending) in `supabase/README.md`. Verify the documented commands run as written
+- [x] 9.4 Schedule `send-reminders` hourly with `pg_cron` and `pg_net` in a migration, with secrets set via `supabase secrets set`. Verify by invoking the function twice for a seeded due reminder and confirming exactly one email arrives and one log row exists
+- [x] 9.5 Document setup and operations (secrets, cron schedule, how to read the function's run counts, how to pause sending) in `supabase/README.md`. Verify the documented commands run as written
 
 ## 10. Account deletion
 

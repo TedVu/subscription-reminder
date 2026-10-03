@@ -15,10 +15,10 @@ Every task is verified by commands that run without a device. "Checks pass" mean
 
 ## 3. View-models (pure, test-first)
 
-- [ ] 3.1 Add `src/lib/screens/home.ts` `homeScreen(subs, profile, today)` returning totals text, renewing-soon rows ("today" / "in N days"), upcoming rows grouped by day (reuse `agenda.ts`/`dayHeading`), trial text, and an empty state. Verify tests cover the spending-overview and in-app reminder scenarios from `add-subscription-tracker-mvp` (totals $25.49/$305.88, soonest first, each subscription once, window filtering, in-app off, empty state)
-- [ ] 3.2 Add `src/lib/screens/subscriptions.ts` `subscriptionsScreen(subs, today)` with Active/Paused/Cancelled sections and row texts. Verify tests for section membership, ordering and paused/cancelled detail text
-- [ ] 3.3 Add `src/lib/screens/settings.ts` `settingsScreen(...)` describing channel switches, the blocked/Expo Go notice, days-before text and appearance options. Verify tests for each notice state
-- [ ] 3.4 Add `src/lib/screens/service-tile.ts` `serviceTile(catalogKey, name)` returning monogram, background (brand colour or `'neutral'`) and foreground. Verify tests: Spotify → green "S"; custom "local gym" → neutral "L"; unknown key → first letter
+- [x] 3.1 Add `src/lib/screens/home.ts` `homeScreen(subs, profile, today)` returning totals text, renewing-soon rows ("today" / "in N days"), upcoming rows grouped by day (reuse `agenda.ts`/`dayHeading`), trial text, and an empty state. Verify tests cover the spending-overview and in-app reminder scenarios from `add-subscription-tracker-mvp` (totals $25.49/$305.88, soonest first, each subscription once, window filtering, in-app off, empty state)
+- [x] 3.2 Add `src/lib/screens/subscriptions.ts` `subscriptionsScreen(subs, today)` with Active/Paused/Cancelled sections and row texts. Verify tests for section membership, ordering and paused/cancelled detail text
+- [x] 3.3 Add `src/lib/screens/settings.ts` `settingsScreen(...)` describing channel switches, the blocked/Expo Go notice, days-before text and appearance options. Verify tests for each notice state
+- [x] 3.4 Add `src/lib/screens/service-tile.ts` `serviceTile(catalogKey, name)` returning monogram, background (brand colour or `'neutral'`) and foreground. Verify tests: Spotify → green "S"; custom "local gym" → neutral "L"; unknown key → first letter
 
 ## 4. Screens in Compose
 

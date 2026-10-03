@@ -20,8 +20,7 @@ export default function AppLayout() {
       indicatorColor={palette.secondaryContainer}
       iconColor={palette.onSurfaceVariant}
       tintColor={palette.onSecondaryContainer}
-      labelStyle={{ color: palette.onSurfaceVariant }}
-      rippleColor={palette.onSurface}>
+      labelStyle={{ color: palette.onSurfaceVariant }}>
       <NativeTabs.Trigger name="index">
         <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon md="calendar_month" />

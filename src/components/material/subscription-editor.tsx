@@ -6,7 +6,6 @@ import {
   AlertDialog,
   Button,
   Column,
-  DateTimePicker,
   LazyColumn,
   ListItem,
   OutlinedButton,
@@ -26,12 +25,12 @@ import { OfflineError } from '@/lib/queries/online';
 import type { SubscriptionStatus } from '@/lib/schedule';
 import {
   describeDateField,
-  isoFromPickedDate,
   validateSubscriptionForm,
   type FormField,
 } from '@/lib/screens/subscription-form';
 import { CYCLE_UNITS, type SubscriptionFormInput, type SubscriptionWrite } from '@/lib/subscriptions/schema';
 
+import { DatePickerDialog } from './date-picker-dialog';
 import { OfflineBanner, ServiceTile } from './pieces';
 
 const UNIT_LABELS = { week: 'Weeks', month: 'Months', year: 'Years' } as const;
@@ -107,17 +106,8 @@ export function SubscriptionEditor({ initialValues, submitLabel, onSubmit, edit 
   const [formError, setFormError] = useState<string>();
   const [busy, setBusy] = useState(false);
   const [picking, setPicking] = useState<'startDate' | 'trialEndsOn' | null>(null);
-  // The picker reports a date as soon as it shows and on every tap, so a
-  // choice is only applied when the user presses OK.
-  const [pendingDate, setPendingDate] = useState<string>();
-  const openPicker = (field: 'startDate' | 'trialEndsOn') => {
-    setPendingDate(undefined);
-    setPicking(field);
-  };
-  const closePicker = () => {
-    setPicking(null);
-    setPendingDate(undefined);
-  };
+  const openPicker = (field: 'startDate' | 'trialEndsOn') => setPicking(field);
+  const closePicker = () => setPicking(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const set = (field: FormField) => (value: string) => setValues((current) => ({ ...current, [field]: value }));
@@ -233,33 +223,14 @@ export function SubscriptionEditor({ initialValues, submitLabel, onSubmit, edit 
       </LazyColumn>
 
       {picking ? (
-        <AlertDialog onDismissRequest={closePicker}>
-          <AlertDialog.Title>
-            <Text>{picking === 'startDate' ? 'Start date' : 'Free trial ends'}</Text>
-          </AlertDialog.Title>
-          <AlertDialog.Text>
-            <DateTimePicker
-              initialDate={values[picking] || values.startDate || null}
-              variant="picker"
-              onDateSelected={(date) => setPendingDate(isoFromPickedDate(date))}
-            />
-          </AlertDialog.Text>
-          <AlertDialog.ConfirmButton>
-            <TextButton
-              enabled={!!pendingDate}
-              onClick={() => {
-                if (pendingDate) set(picking)(pendingDate);
-                closePicker();
-              }}>
-              <Text>OK</Text>
-            </TextButton>
-          </AlertDialog.ConfirmButton>
-          <AlertDialog.DismissButton>
-            <TextButton onClick={closePicker}>
-              <Text>Cancel</Text>
-            </TextButton>
-          </AlertDialog.DismissButton>
-        </AlertDialog>
+        <DatePickerDialog
+          initialDate={values[picking] || values.startDate || null}
+          onConfirm={(iso) => {
+            set(picking)(iso);
+            closePicker();
+          }}
+          onDismiss={closePicker}
+        />
       ) : null}
 
       {confirmDelete && edit ? (

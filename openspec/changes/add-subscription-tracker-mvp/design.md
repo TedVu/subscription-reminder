@@ -120,7 +120,7 @@ The unique key on the log is what guarantees "at most once", including when two 
 
 ### 7. Unsubscribing from emails
 
-Each email contains a link to `supabase/functions/unsubscribe?u=<user_id>&t=<hmac>`. The token is an HMAC-SHA256 of the user id with a server secret. Visiting the link sets `notify_email = false` and shows a plain confirmation page. The function also sends `List-Unsubscribe` and `List-Unsubscribe-Post` headers, which help emails avoid spam folders. No login is needed, and the token can't be forged.
+Each email contains a link to `supabase/functions/unsubscribe?u=<user_id>&t=<hmac>`. The token is an HMAC-SHA256 of the user id with a server secret. Visiting the link sets `notify_email = false` and returns a short plain-text confirmation (Supabase serves function responses on `*.supabase.co` as `text/plain`, so it cannot be an HTML page). The function also sends `List-Unsubscribe` and `List-Unsubscribe-Post` headers, which help emails avoid spam folders. No login is needed, and the token can't be forged.
 
 ### 8. Auth: Supabase email OTP, with Resend as the mail server
 
@@ -175,7 +175,7 @@ The scaffold's `expo-sqlite`, `drizzle-orm`, `drizzle-kit`, `babel-plugin-inline
 ### 14. Environments and secrets
 
 - A hosted Supabase **dev** project, managed with the Supabase CLI (`supabase link`, `supabase db push`, `supabase functions deploy`). Running the Supabase stack locally needs Docker Desktop, which is optional for this setup.
-- App config uses `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` from `.env.local` (gitignored) and EAS environment variables. Only the anon key ever reaches the app.
+- App config uses `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` from `.env.local` (gitignored) and EAS environment variables. Only the publishable key (formerly "anon key") ever reaches the app; the secret key stays in function secrets.
 - Function secrets (`RESEND_API_KEY`, `UNSUBSCRIBE_SECRET`, `CRON_SECRET`, `EMAIL_FROM`) are set with `supabase secrets set`.
 
 ## Risks / Trade-offs
